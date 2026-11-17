@@ -10,8 +10,14 @@ from day1 import (
     )
 
 
-@pytest.fixture
+count_fixture_call = 0
+
+#@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def packages():
+    global count_fixture_call
+    count_fixture_call += 1
+    print(f'Fixture called the {count_fixture_call} times')
     return [
         {
             "name": "firefox",
@@ -134,3 +140,40 @@ def test_get_latest_packages(packages):
             "channel": "stable",
         },
     ] 
+
+
+# -----------------------------------------
+#  Task 4: more test for pytest parametrize
+# -----------------------------------------
+
+@pytest.mark.parametrize(
+        "name, expected_count",
+        [
+            ("firefox", 3),
+            ("vlc", 1),
+            ("chromium", 1),
+            ("dla", 0),
+        ],
+)
+def test_find_package_by_name(packages, name, expected_count):
+    result = find_packages(packages, name=name)
+
+    assert len(result) == expected_count
+
+
+# -----------------------------------------
+#  Task 5: more test for exception
+# -----------------------------------------
+@pytest.mark.parametrize(
+        "version",
+        [
+            (""), ("1.2.x"),
+        ],
+)
+def test_parse_version(version):
+    with pytest.raises(ValueError) as exc_info:
+        parse_version(version)
+
+    assert "Invalid version" in str(exc_info.value)
+
+
