@@ -66,11 +66,13 @@ def iter_package_feed(lines: Iterable[str], *, skip_invalid: bool = False) -> It
         try:
             pkg_record = parse_package_record(line, line_number=line_num)
             yield pkg_record
-        except Exception as e:
-            if skip_invalid:
-                logger.warning(f"WARNING: Invalid package record at line {line_num}")
-                continue
-            raise
+        except PackageRecordError  as e:
+            if not skip_invalid:
+                raise
+            logger.warning("Skipping Invalid package record at line %d %s", line_num, e)
+            continue
+        
+        yield pkg_record
 
 
 if __name__ == "__main__":
