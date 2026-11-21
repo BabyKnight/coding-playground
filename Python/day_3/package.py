@@ -2,8 +2,28 @@ from collections.abc import Iterable, Iterator
 
 
 def iter_batches(items: Iterable, batch_size: int) -> Iterator[list]:
-    for start in range(0, len(items), batch_size):
-        yield items[start: start + batch_size]
+    # check whether the batch_size is int and not bool
+    if not isinstance(batch_size, int) or isinstance(batch_size, bool):
+        raise ValueError("batch_size must be integer")
+
+    if batch_size <= 0:
+        raise ValueError("bathc_size must be greater than zero")
+
+    # ----- Sometimes Iterable is not support len
+    #for start in range(0, len(items), batch_size):
+    #    yield items[start: start + batch_size]
+
+    batch = []
+
+    for item in items:
+        batch.append(item)
+
+        if len(batch) == batch_size:
+            yield batch
+            batch = []
+
+    if batch:
+        yield batch
 
 
 def iter_packages(
@@ -14,13 +34,15 @@ def iter_packages(
 
     result = []
 
-    for pkg in packages:
-        if channel is not None and pkg.get("channel") != channel:
-            continue
-        if architecture is not None and pkg.get("architecture") != architecture:
-            continue
+    for batch in iter_batches(packages, 3):
+        # batch contains <= 3 packages
+        for pkg in batch:
+            if channel is not None and pkg.get("channel") != channel:
+                continue
+            if architecture is not None and pkg.get("architecture") != architecture:
+                continue
 
-        result.append(pkg)
+            result.append(pkg)
 
     return result
 
