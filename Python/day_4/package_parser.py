@@ -58,9 +58,7 @@ def parse_package_record(raw: str, line_number: int) -> PackageRecord:
 
 def iter_package_feed(lines: Iterable[str], *, skip_invalid: bool = False) -> Iterator[PackageRecord]:
 
-    line_num = 0
-    for line in lines:
-        line_num += 1
+    for line_num, line in enumerate(lines, start=1):
 
         if not line:
             continue
