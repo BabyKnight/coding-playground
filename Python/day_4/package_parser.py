@@ -60,7 +60,7 @@ def iter_package_feed(lines: Iterable[str], *, skip_invalid: bool = False) -> It
 
     for line_num, line in enumerate(lines, start=1):
 
-        if not line:
+        if not line.strip():
             continue
 
         try:

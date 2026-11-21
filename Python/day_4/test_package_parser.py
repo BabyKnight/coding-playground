@@ -45,7 +45,7 @@ def test_packagerecord_with_missing_arg(name, version, arch, channel):
             ("", "120.0", "amd64", "stable"),
             ("firefox", "    ", "amd64", "stable"),
             ("firefox", "120.0", "", "stable"),
-            ("firefox", "120.0", "amd64", "    "),
+            ("firefox", "120.0", "amd64", "\n"),
             ("        ", "", "   ", ""),
         ]
 )
