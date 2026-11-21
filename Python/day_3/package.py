@@ -32,19 +32,25 @@ def iter_packages(
         architecture: str | None = None,
     ) -> Iterator[dict]:
 
-    result = []
+    #    result = []
+    #
+    #    for batch in iter_batches(packages, 3):
+    #        # batch contains <= 3 packages
+    #        for pkg in batch:
+    #            if channel is not None and pkg.get("channel") != channel:
+    #                continue
+    #            if architecture is not None and pkg.get("architecture") != architecture:
+    #                continue
+    #
+    #            result.append(pkg)
 
-    for batch in iter_batches(packages, 3):
-        # batch contains <= 3 packages
-        for pkg in batch:
-            if channel is not None and pkg.get("channel") != channel:
-                continue
-            if architecture is not None and pkg.get("architecture") != architecture:
-                continue
+    for pkg in packages:
+        if channel is not None and pkg.get("channel") != channel:
+            continue
+        if architecture is not None and pkg.get("architecture") != architecture:
+            continue
 
-            result.append(pkg)
-
-    return result
+        yield pkg
 
 
 packages = [

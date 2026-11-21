@@ -66,7 +66,7 @@ def test_iter_packages_by_channel_arch(packages):
 
 
 def test_iter_packages_without_filter(packages):
-    result = iter_packages(packages)
+    result = list(iter_packages(packages))
 
     assert result == packages
 
