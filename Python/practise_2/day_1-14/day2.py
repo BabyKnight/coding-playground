@@ -1,4 +1,5 @@
 import json
+import copy
 from collections import defaultdict
 
 def remove_duplicates(items: list) -> list:
@@ -142,6 +143,68 @@ def merge_dicts_v4(dict1: dict, dict2: dict) -> dict:
     return dict1 | dict2
 
 
+def deep_merge(dict1: dict, dict2: dict) -> dict:
+    #result = copy.deepcopy(dict1)
+    result = dict1.copy()
+
+    for k, v2 in dict2.items():
+        v1 = result.get(k)
+
+        if isinstance(v1, dict) and isinstance(v2, dict):
+            result[k] = deep_merge(v1, v2)
+
+        else:
+            result[k] = v2
+
+    return result
+
+
+def flatten(items: list) -> list:
+    # recursive implimation
+    result = []
+
+    for item in items:
+        if isinstance(item, list):
+            result.extend(flatten(item))
+        else:
+            result.append(item)
+
+    return result
+
+
+def flatten_v2(items: list) -> list:
+    # non-recursive
+    result = []
+    stack = items.copy()
+
+    while stack:
+        cur = stack.pop()
+
+        if isinstance(cur, list):
+            stack.extend(cur)
+        else:
+            result.append(cur)
+
+    result.reverse()
+    return result
+
+
+
+def group_by(items: list[dict], key: str) -> dict:
+    
+    result = {}
+
+    for item in items:
+        if not isinstance(item, dict) or key not in item:
+            continue
+        if item[key] not in result:
+            result[item[key]] = [item]
+        else:
+            result[item[key]].append(item)
+
+    return result
+
+
 if __name__ == "__main__":
     print(remove_duplicates([1, 2, 3, 2, 4, 1, 5, 3]))
     print(remove_duplicates_v2([1, 2, 3, 2, 4, 1, 5, 3]))
@@ -184,3 +247,54 @@ if __name__ == "__main__":
     print(merge_dicts_v2(dict1, dict2))
     print(merge_dicts_v3(dict1, dict2))
     print(merge_dicts_v4(dict1, dict2))
+
+
+    dict1 = {
+        "name": "Firefox",
+        "config": {
+            "version": "120",
+            "enabled": True,
+            "settings": {
+                "theme": "dark",
+                "timeout": 30,
+            }
+        },
+        "tags": ["browser"],
+    }
+
+    dict2 = {
+        "config": {
+            "version": "121",
+            "settings": {
+                "timeout": 60,
+                "language": "en",
+            }
+        },
+        "tags": ["desktop"],
+    }
+
+    print(deep_merge(dict1, dict2))
+
+
+    items = [
+        1,
+        [2, 3],
+        [4, [5, 6]],
+        7,
+        [[8, 9], 10],
+    ]
+
+    print(flatten(items))
+    print(items)
+    print(flatten_v2(items))
+
+
+    packages = [
+        {"name": "firefox", "architecture": "amd64"},
+        {"name": "chrome", "architecture": "amd64"},
+        {"name": "vlc", "architecture": "arm64"},
+        {"name": "gimp", "architecture": "amd64"},
+        {"name": "vim", "architecture": "arm64"},
+    ]
+
+    print(group_by(packages, "architecture"))
