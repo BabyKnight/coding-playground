@@ -66,18 +66,20 @@ class PackageQueue:
         self.que.append(package)
 
     def dequeue(self) -> str | None:
-        if len(self.que) == 0:
+        if self.size() == 0:
             return None
         res = self.que.popleft()
         return res
 
     def peek(self) -> str | None:
-        if len(self.que) == 0:
+        #if len(self.que) == 0:
+        #if not self.que:
+        if self.size() == 0:
             return None
         return self.que[0]
 
     def is_empty(self) -> bool:
-        return len(self.que) == 0
+        return self.size() == 0
 
     def size(self) -> int:
         return len(self.que)
@@ -103,15 +105,83 @@ class PackageHistory:
 # Problem 8
 
 def count_log_levels(logs: list[str]) -> dict[str, int]:
-    return dict(Counter([log.split(" ")[0] for log in logs]))
+    return dict(Counter([log.split()[0] for log in logs]))
 
 def get_error_packages(logs: list[str]) -> list[str]:
-    return  [log.split(" ")[2] for log in logs if log.split(" ")[0] == "ERROR"]
+    #return  [log.split()[2] for log in logs if log.split()[0] == "ERROR"]
+    return  [parts[2] for log in logs if (parts := log.split()) and parts[0] == "ERROR"]
 
 def get_top_error_package(logs: list[str]) -> str | None:
-    pass
+    err_log_cnt = Counter([log.split()[2] for log in logs if log.split()[0] == "ERROR"])
+    if not err_log_cnt:
+        return None
+
+    return err_log_cnt.most_common(1)[0][0]
+    #return sorted(dict(err_log_cnt).items(), key = lambda x: x[1], reverse=True)[0]
 
 
+# Problem 9
+
+
+def sliding_window_errors(
+    events: list[bool],
+    window_size: int
+) -> list[int]:
+    dq = deque()
+    count = 0
+    res = []
+
+    for val in events:
+        dq.append(val)
+        if val:
+            count += 1
+
+        if len(dq) == window_size:
+            res.append(count)
+
+            out = dq.popleft()
+            if out:
+                count -= 1
+
+    return res
+
+
+# Problem 10
+
+def count_by_architecture(packages: list[dict]) -> dict[str, int]:
+    return dict(Counter([pkg["architecture"] for pkg in packages]))
+
+
+def count_by_category(packages: list[dict]) -> dict[str, int]:
+    return dict(Counter([pkg["category"] for pkg in packages]))
+
+
+def get_most_used_architecture(
+    packages: list[dict]
+) -> str | None:
+    enabled_pkg_count = Counter((pkg["architecture"] for pkg in packages if pkg["enabled"]))
+    return enabled_pkg_count.most_common(1)[0][0]
+    # return sorted(enabled_pkg_count.items(), key = lambda x: x[1], reverse=True)[0]
+
+def get_top_category(
+    packages: list[dict]
+) -> tuple[str, int] | None:
+    pkg_cnt_by_cat = Counter((pkg["category"] for pkg in packages))
+    return pkg_cnt_by_cat.most_common(1)[0]
+    # return sorted(pkg_cnt_by_cat.items(), key = lambda x: x[1], reverse=True)[0]
+
+def generate_report(packages: list[dict]) -> dict:
+    total = len(packages)
+    enabled = sum(1 for pkg in packages if pkg["enabled"])
+
+    return {
+        "total": total,
+        "enabled": enabled,
+        "disabled": total - enabled,
+        "architecture_counts": count_by_architecture(packages),
+        "category_counts": count_by_category(packages),
+        "top_category": get_top_category(packages)
+    }
 
 
 if __name__ == "__main__":
@@ -187,14 +257,45 @@ if __name__ == "__main__":
     logs = [
         "INFO Package firefox installed",
         "ERROR Package vim installation failed",
+        "ERROR Package vim installation failed",
+        "ERROR Package vim installation failed",
         "INFO Package vlc installed",
         "WARNING Package chrome update delayed",
         "ERROR Package git installation failed",
         "INFO Package vim installed",
+        "ERROR Package vlc installation failed",
         "ERROR Package vlc installation failed"
     ]
     print(count_log_levels(logs))
     print(get_error_packages(logs))
+
     print(get_top_error_package(logs))
     
+    events = [
+        False, True, False, True,
+        True, False, False, True
+    ]
+
+    print(sliding_window_errors(events, 3))
+
+
+    packages = [
+        {"name": "firefox", "architecture": "amd64", "category": "browser", "enabled": True},
+        {"name": "chrome", "architecture": "amd64", "category": "browser", "enabled": False},
+        {"name": "vim", "architecture": "arm64", "category": "editor", "enabled": True},
+        {"name": "nano", "architecture": "amd64", "category": "editor", "enabled": True},
+        {"name": "vlc", "architecture": "arm64", "category": "media", "enabled": True},
+        {"name": "firefox", "architecture": "amd64", "category": "browser", "enabled": True},
+        {"name": "git", "architecture": "amd64", "category": "development", "enabled": False},
+        {"name": "code", "architecture": "amd64", "category": "development", "enabled": True}
+    ]
+
+    print(count_by_architecture(packages))
+    print(count_by_category(packages))
+    print(get_most_used_architecture(packages))
+    print(get_top_category(packages))
+    print(generate_report(packages))
+
+
+
 
