@@ -164,6 +164,31 @@ class Package5():
     def __repr__(self):
         return f'Package5("{self.name}","{self.version_str}")'
 
+class PackageRepository:
+
+    def __init__(self, packages):
+        self._packages = list(packages)
+
+    def __getitem__(self, index):
+        return self._packages[index]
+
+    def __iter__(self):
+        return iter(self._packages)
+
+    def __contains__(self, package):
+        return package in self._packages
+
+class Packages6:
+    def __init__(self, name, version):
+        self.name = name
+        self.version = version
+
+    def __str__(self):
+        return f"Packages6: {self.name} v{self.version}"
+
+    def __repr__(self):
+        return f"Packages6(name={repr(self.name)}, version={repr(self.version)})"
+
 
 if __name__ == "__main__":
     pkg = Package(
@@ -216,3 +241,7 @@ if __name__ == "__main__":
     print(pkg1 == pkg2)
     print(pkg1 < pkg2)
     print(pkg1 > pkg2)
+
+    pkg = Packages6("dla", "1.2.2")
+    print(str(pkg))
+    print(repr(pkg))
